@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <title>Cấu hình ESP32</title>
+  <style>
+    body {
+        font-family: sans-serif;
+        /* padding: 10px 60px 100px 60px; */
+        padding: 10px 10px 100px 10px;
+        margin-top: 0;
+        text-align: center;
+        background: #f5f5f5;
+      }
+
+    #statusText.running {
+      color: #2e7d32; /* Xanh đậm nổi bật */
+    }
+
+    #statusText.stopped {
+      color: #b71c1c; /* Đỏ khi dừng */
+    }
+
+    .icon-indicator {
+      font-size: 20px;
+      margin-right: 6px;
+      animation: blinkFire 1s infinite;
+    }
+
+    @keyframes blinkFire {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    input[type="number"] {
+      font-size: 20px;
+      padding: 10px;
+      width: 140px;
+      text-align: center;
+      border-radius: 8px;
+      border: 2px solid #ccc;
+    }
+
+    table.info-table th {
+      text-align: center;
+      padding: 10px;
+      background-color: #f1f1f1;
+      border-bottom: 2px solid #ddd;
+    }
+
+    table.info-table td {
+      padding: 5px;
+      text-align: center;
+    }
+
+    table.info-table input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 8px 16px;
+      font-size: 16px;
+      border-radius: 6px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    button:hover {
+      background-color: #388e3c;
+    }
+
+    input.error {
+      border-color: red;
+    }
+
+    #sentMsg {
+      margin-top: 15px;
+      color: green;
+      font-weight: bold;
+    }
+
+    #confirmBox {
+      display: none;
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border: 2px solid #ccc;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    #confirmBox button {
+      min-width: 120px;
+      padding: 8px 10px;
+    }
+    
+
+    select, input[type="text"] {
+      font-size: 16px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      border: 2px solid #ccc;
+    }
+
+    .control-panel {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      background-color: #e0ebf5;
+      border: 2px solid #6b90b7;
+      border-radius: 10px;
+      text-align: left;
+    }
+
+    .control-panel h3 {
+      text-align: center;
+      margin-top: 0;  /* khoảng cách phía trên */
+      margin-bottom: 20px;
+      font-size: 22px;
+      color: #2c3e50;
+    }
+
+    .status-box {
+      text-align: center;
+      padding: 8px;
+      border-radius: 5px;
+      background-color: #d0e7ff;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+  .arrows {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 14px auto;
+
+    margin-top: 4px !important;
+    margin-bottom: 12px; /* khoảng cách tới nút CHẠY/DỪNG */
+  }
+  .step-dropdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 12px;
+  gap: 8px; /* 👈 tạo khoảng cách giữa label và dropdown */
+}
+
+  .arrows button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+    width: 120px;
+    height: 40px;
+    background-color: #6b90b7;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    gap: 6px; /* khoảng cách giữa icon và chữ */
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.2s, transform 0.1s ease;
+  }
+
+  .arrows button:hover {
+    background-color: #4a6d99;
+    transform: scale(1.05);
+  }
+
+  .arrows button:active {
+  transform: scale(0.95);
+  background-color: #3e5c80;
+}
+
+.run-stop1 {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 14px auto;
+
+    margin-top: 4px !important;
+    margin-bottom: 12px; 
+  }
+#stopButton,
+  #startButton
+ {
+   width: 120px;
+   /* padding: 10px; */
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.3s ease;  
+}
+#startButton {
+  background-color: #c2f0b1;  
+  color: #1b5e20;
+} 
+
+#stopButton {
+  background-color: #f28f8f; 
+  color: #b71c1c;
+}
+
+#startButton:hover,
+#stopButton:hover {
+  transform: scale(1.05); 
+}
+
+#startButton:active,
+#stopButton:active {
+  transform: scale(0.95);
+  background-color: #5a9931; 
+}
+
+#stopButton:active {
+  background-color: #9e2a2a; 
+}
+
+    
+
+    .config-button-group {
+      display: flex;
+      flex-wrap: wrap;         /* cho responsive khi màn nhỏ */
+      justify-content: center; /* căn giữa */
+      gap: 8px;                /* khoảng cách giữa các nút */
+      margin-top: 8px;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: white;
+      border-top: 1px solid #ccc;
+      padding: 10px 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      z-index: 100;
+    }
+
+
+/* Cấu hình bảng trong tab "Điều khiển" */
+[data-tab-content="dieukhien"] .info-table {
+  width: 100%;
+  border-collapse: collapse; /* Đảm bảo các ô trong bảng không bị viền riêng biệt */
+}
+
+[data-tab-content="dieukhien"] .info-table th,
+[data-tab-content="dieukhien"] .info-table td {
+  text-align: center;
+  padding: 12px;
+  border-top: 1px solid #ccc; /* Viền trên của các ô */
+  border-bottom: 1px solid #ccc; /* Viền dưới của các ô */
+}
+
+[data-tab-content="dieukhien"] .info-table th {
+  background-color: #4caf50; /* Màu nền của tiêu đề */
+  /* color: white; */
+  font-weight: bold;
+}
+
+[data-tab-content="dieukhien"] .info-table td {
+  background-color: #E0EBF5; /* Màu nền của các ô */
+}
+/* Đảm bảo viền cho cả 2 ô trên cùng một dòng */
+[data-tab-content="dieukhien"] .info-table tr td:first-child {
+  border-left: 1px solid #ccc; /* Viền trái cho ô đầu tiên */
+}
+
+[data-tab-content="dieukhien"] .info-table tr td:last-child {
+  border-right: 1px solid #ccc; /* Viền phải cho ô cuối cùng */
+}
+
+
+
+    /* Căn chỉnh bảng trong tab Cấu hình */
+[data-tab-content="cauhinh"] .info-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse; /* Đảm bảo các viền bảng liền nhau */
+  margin-bottom: 20px;
+}
+
+/* Căn chỉnh các tiêu đề cột trong bảng của tab Cấu hình */
+[data-tab-content="cauhinh"] th {
+  text-align: center;
+  padding: 10px;  /* Tăng padding cho tiêu đề cột */
+  background-color: #4caf50; /* Màu nền nổi bật cho tiêu đề */
+  color: white; /* Màu chữ trắng để dễ đọc */
+  font-weight: bold;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+
+/* Căn chỉnh các ô trong bảng của tab Cấu hình */
+[data-tab-content="cauhinh"] td {
+  text-align: center;
+  padding: 10px;  /* Tăng padding cho các ô */
+  border: 1px solid #ddd;  /* Viền nhẹ cho các ô */
+  font-size: 14px;  /* Giảm kích thước font để bảng không quá dày */
+  background-color: #fff; /* Màu nền trắng cho các ô */
+}
+
+/* Căn chỉnh ô nhập liệu cho đồng đều trong tab Cấu hình */
+[data-tab-content="cauhinh"] input[type="number"] {
+  width: 90%;  /* Đảm bảo ô nhập liệu chiếm gần hết chiều rộng của cột */
+  padding: 8px;  /* Tăng padding của input */
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box; /* Đảm bảo padding không làm rộng thêm ô */
+  font-size: 17px;  /* Kích thước font của ô nhập liệu */
+}
+
+/* Thêm khoảng cách giữa các dòng trong bảng */
+[data-tab-content="cauhinh"] tr {
+  height: 30px;  /* Tăng chiều cao của mỗi dòng */
+}
+
+/* Tăng độ đậm cho các ô nhập liệu khi có lỗi */
+[data-tab-content="cauhinh"] input.error {
+  border-color: red; /* Đổi màu viền khi có lỗi nhập liệu */
+}
+[data-tab-content="cauhinh"] .info-table th {
+  font-size: 16px;
+  padding: 12px; /* Giảm padding để có không gian hơn */
+  background-color: #4c89af; /* Màu nền xanh lá tươi sáng */
+  color: white; /* Màu chữ trắng để nổi bật */
+  text-align: center; /* Căn giữa tiêu đề */
+  font-weight: bold; /* Làm đậm chữ để dễ nhìn */
+  border: 1px solid #ccc; /* Viền nhẹ cho tiêu đề */
+  border-radius: 5px; /* Bo góc viền để tạo cảm giác mềm mại */
+}
+
+
+/* Thêm hiệu ứng chớp nháy cho dòng cảnh báo */
+@keyframes blink {
+  0%, 100% {
+    background-color: #ffcccc;  /* Màu đỏ nhạt */
+    color: #b71c1c;  /* Màu chữ đỏ */
+  }
+  50% {
+    background-color: #ffebee;  /* Màu nền nhạt hơn */
+    color: #b71c1c;  /* Màu chữ đỏ */
+  }
+}
+
+/* Áp dụng hiệu ứng chớp nháy cho dòng cảnh báo */
+#alertText.blink {
+  animation: blink 1s infinite;  /* Chạy hiệu ứng chớp nháy */
+  font-weight: bold;
+}
+
+
+
+@media (max-width: 600px) {
+  .info-table {
+    width: 100%;
+    table-layout: fixed;  /* Đảm bảo các cột có chiều rộng đều */
+  }
+
+  .info-table tr {
+    display: table-row;  /* Tránh dùng flex cho tr để giữ cấu trúc bảng chuẩn */
+  }
+
+  .info-table td {
+    display: table-cell;  /* Đảm bảo mỗi ô giữ dạng bảng */
+    font-size: 14px;  /* Giảm kích thước font */
+    padding: 8px;  /* Giảm padding để tạo không gian hợp lý */
+    
+  }
+
+ [data-tab-content="dieukhien"] .info-table td:first-child {
+    text-align: left;
+    font-weight: bold;
+  }
+
+ [data-tab-content="dieukhien"] .info-table td:last-child {
+    text-align: right;
+    font-weight: bold;
+  }
+
+  /* Điều chỉnh cho các tiêu đề */
+  .info-table th {
+    font-size: 16px;
+    padding: 10px;
+    background-color: #4caf50;  /* Màu nền tiêu đề */
+    color: white;
+    text-align: center;
+    
+  }
+
+  /* Cải thiện khoảng cách giữa các dòng */
+  .info-table tr {
+    height: 45px;  /* Tăng chiều cao mỗi dòng */
+    
+  }
+}
+
+  </style>
+</head>
+<body>
+  <h2>CHƯƠNG TRÌNH LÒ NHIỆT</h2>
+
+  <!-- Popup xác nhận -->
+<div id="confirmationPopup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 2px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);">
+  <h4>Bạn có chắc chắn muốn thực hiện hành động này?</h4>
+  <div style="text-align: center;">
+    <button id="confirmActionButton" style="padding: 10px 20px; background-color: #4caf50; color: white; border: none; border-radius: 5px;">Xác nhận</button>
+    <button id="cancelActionButton" style="padding: 10px 20px; background-color: #f44336; color: white; border: none; border-radius: 5px;">Hủy</button>
+  </div>
+</div>
+
+
+<!-- Tabs content -->
+  <div data-tab-content="dieukhien">
+    <div class="control-panel">
+      <h3>Điều Khiển Lò Nhiệt</h3>
+
+      <div class="status-box">
+        <span style="margin-right: 8px;">Trạng thái:</span>
+        <span id="statusIndicator" class="icon-indicator">🔴</span>
+        <strong id="statusText">ĐANG DỪNG</strong>
+      </div>
+
+      <table class="info-table">
+        <tr><td>📄 Tên file:</td><td><strong id="selectedFileName">...</strong></td></tr>
+        <tr><td>🔥 Nhiệt độ thực:</td><td><strong  id="realtimeTemp">0°C</strong></td></tr>
+        <tr><td>🌡️ Nhiệt độ cài:</td><td><strong id="realtimeTempSV">0°C</strong></td></tr>
+        <tr><td>📉 Bước nhiệt:</td><td><strong id="stepNumber">1</strong></td></tr>
+        <tr><td>⏱️ Thời gian bước:</td><td><strong id="stepTime">...</strong></td></tr>
+        <tr><td>⏱️ TG bước đã chạy:</td><td><strong id="stepElapsed">...</strong></td></tr>
+        <tr><td>🕒 Tổng TG dự kiến:</td><td><strong id="totalExpected">...</strong></td></tr>
+        <tr><td>🧮 Tổng TG đã chạy:</td><td><strong id="totalElapsed">...</strong></td></tr>
+        <tr><td>⚠️ Cảnh báo:</td><td><strong  id="alertText">Không có</strong></td></tr>
+      </table>
+
+
+      <div class="step-dropdown" style="text-align: center; margin-bottom: 10px;">
+        <label for="stepSelect"><strong>📌 Chọn chương trình:</strong></label>
+        <select id="stepSelect" style="font-size:16px; padding:6px 12px; border-radius:6px; margin-left:10px; border:1px solid #aaa;">
+          <!-- Option sẽ được cập nhật bằng JS -->
+        </select>
+      </div>
+
+
+      <div class="arrows">
+        <button id="step-up">🔼 Tăng bước</button>
+        <button id="step-down">🔽 Giảm bước</button>
+      </div>
+
+      <div class="run-stop1">
+        <button id="startButton" class="start">▶️ CHẠY</button>
+        <button id="stopButton" class="stop">⛔ DỪNG</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div data-tab-content="cauhinh" style="display:none">
+  <label for="fileSelect">Chọn file cấu hình:</label>
+  <select id="fileSelect">
+    <option value="0">📁 File 1</option>
+    <option value="1">📁 File 2</option>
+    <option value="2">📁 File 3</option>
+    <option value="3">📁 File 4</option>
+    <option value="4">📁 File 5</option>
+  </select>
+
+  <br />
+  <input type="text" id="fileName" placeholder="🔤 Đổi tên file..." />
+  <br />
+  <div class="config-button-group">
+    <button id="renameBtn">💾 Đổi tên file</button>
+    <button id="saveBtn">💾 Lưu cài đặt</button>
+    <button id="loadBtn">🔄 Load cấu hình</button>
+  </div>
+
+  <div class="input-group">
+    <!-- Tiêu đề cột Nhiệt độ và Thời gian -->
+    <table class="info-table">
+      <thead>
+        <tr>
+          <th>Bước</th>
+          <th>Nhiệt độ</th>
+          <th>Thời gian</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bước 0</td>
+          <td><input type="number" id="T0" placeholder="Nhiệt độ" min="0" max="1300" step="1" /></td>
+          <td><input type="number" id="D0" placeholder="Thời gian" min="0" max="1300" step="1" style="display: none;" /></td>
+        </tr>
+        <tr>
+          <td>Bước 1</td>
+          <td><input type="number" id="T1" placeholder="Nhiệt độ" min="0" max="1300" step="1" /></td>
+          <td><input type="number" id="D1" placeholder="Thời gian" min="0" max="1300" step="1" /></td>
+        </tr>
+        <tr>
+          <td>Bước 2</td>
+          <td><input type="number" id="T2" placeholder="Nhiệt độ" min="0" max="1300" step="1" /></td>
+          <td><input type="number" id="D2" placeholder="Thời gian" min="0" max="1300" step="1" /></td>
+        </tr>
+        <tr>
+          <td>Bước 3</td>
+          <td><input type="number" id="T3" placeholder="Nhiệt độ" min="0" max="1300" step="1" /></td>
+          <td><input type="number" id="D3" placeholder="Thời gian" min="0" max="1300" step="1" /></td>
+        </tr>
+        <tr>
+          <td>Bước 4</td>
+          <td><input type="number" id="T4" placeholder="Nhiệt độ" min="0" max="1300" step="1" /></td>
+          <td><input type="number" id="D4" placeholder="Thời gian" min="0" max="1300" step="1" /></td>
+        </tr>
+        <tr>
+          <td>Bước 5</td>
+          <td><input type="number" id="T5" placeholder="Nhiệt độ" min="0" max="1300" step="1" /></td>
+          <td><input type="number" id="D5" placeholder="Thời gian" min="0" max="1300" step="1" /></td>
+        </tr>
+        <tr>
+          <td>Bước 6</td>
+          <td><input type="number" id="T6" placeholder="Nhiệt độ" min="0" max="1300" step="1" /></td>
+          <td><input type="number" id="D6" placeholder="Thời gian" min="0" max="1300" step="1" /></td>
+        </tr>
+        <tr>
+          <td>Bước 7</td>
+          <td><input type="number" id="T7" placeholder="Nhiệt độ" min="0" max="1300" step="1" /></td>
+          <td><input type="number" id="D7" placeholder="Thời gian" min="0" max="1300" step="1" /></td>
+        </tr>
+        <tr>
+          <td>Bước 8</td>
+          <td><input type="number" id="T8" placeholder="Nhiệt độ" min="0" max="1300" step="1" /></td>
+          <td><input type="number" id="D8" placeholder="Thời gian" min="0" max="1300" step="1" /></td>
+        </tr>
+
+        <tr>
+          <td>Bước 9</td>
+          <td><input type="number" id="T9" placeholder="Nhiệt độ" min="0" max="1300" step="1" /></td>
+          <td><input type="number" id="D9" placeholder="Thời gian" min="0" max="1300" step="1" /></td>
+        </tr>
+        <tr>
+          <td>Bước 10</td>
+          <td><input type="number" id="T10" placeholder="Nhiệt độ" min="0" max="1300" step="1" /></td>
+          <td><input type="number" id="D10" placeholder="Thời gian" min="0" max="1300" step="1" /></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="sentMsg"></div>
+
+  <div id="confirmBox">
+    <p>Bạn có chắc chắn muốn lưu cài đặt?</p>
+    <button id="confirmYes">✅ Có</button>
+    <button id="confirmNo">❌ Không</button>
+  </div>
+</div>
+
+<!-- Thanh tab cố định ở chân trang -->
+<footer style="position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ccc; padding: 10px 0; display: flex; justify-content: center; gap: 20px; z-index: 1000;">
+  <button data-tab="dieukhien">🧭 Điều khiển</button>
+  <button data-tab="cauhinh">⚙️ Cấu hình</button>
+</footer>
+
+  <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
+  <script>
+    let fileLabels = []; // chỉ khai báo 1 lần ở đầu
+    let isConfigLoaded = false;
+    // const fields = ["A", "B", "C", "D", "E"];
+
+        const fields = [
+     "T0", "T1", "D1", "T2", "D2", "T3", "D3", "T4", "D4",
+      "T5", "D5", "T6", "D6", "T7", "D7", "T8", "D8", "T9", "D9", "T10", "D10"
+    ];
+    const inputs = fields.map(id => document.getElementById(id));
+    const fileSelect = document.getElementById("fileSelect");
+    const fileNameInput = document.getElementById("fileName");
+    const renameBtn = document.getElementById("renameBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const loadBtn = document.getElementById("loadBtn");
+    const sentMsg = document.getElementById("sentMsg");
+
+    const confirmBox = document.getElementById("confirmBox");
+    const confirmYes = document.getElementById("confirmYes");
+    const confirmNo = document.getElementById("confirmNo");
+
+    const tempPV = document.getElementById('realtimeTemp');  // Phần tử hiển thị nhiệt độ
+    const tempSV = document.getElementById('realtimeTempSV');  // Phần tử hiển thị nhiệt độ
+
+    let isEditing = false;
+    let editTimer = null;
+    let actionFile1 = null, actionFile2 = null, actionFile3 = null, actionFile4 = null, actionFile5 = null;
+    let actionRename1 = null, actionRename2 = null, actionRename3 = null, actionRename4 = null, actionRename5 = null;
+    let configNameFile1 = null, configNameFile2 = null, configNameFile3 = null, configNameFile4 = null, configNameFile5 = null;
+    let configValueFile1 = null, configValueFile2 = null, configValueFile3 = null, configValueFile4 = null, configValueFile5 = null;
+    let actionLoadFile1 = null, actionLoadFile2 = null;
+    let configND = 0, configSV = 0, configReadPrg = null;
+    let selectFileRUN = null, statusL = null, timechay = null, runStop = null, btnTangGiam = null, buochay = null;
+    let currentValues = {};
+    let manualStep = 1;
+
+    document.querySelectorAll("[data-tab]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tab = btn.getAttribute("data-tab");
+        document.querySelectorAll("[data-tab-content]").forEach(div => {
+          div.style.display = div.getAttribute("data-tab-content") === tab ? "block" : "none";
+        });
+
+        // Khi vào tab cấu hình, chỉ tải dữ liệu một lần
+        if (tab === "cauhinh" && !isConfigLoaded) {
+          loadConfigData(); // Tải dữ liệu từ file cấu hình
+          isConfigLoaded = true;  // Đánh dấu là đã tải cấu hình
+        }
+
+         // Khi vào tab "Điều khiển", đặt lại isConfigLoaded thành false
+        if (tab === "dieukhien") {
+          isConfigLoaded = false; // Đặt lại isConfigLoaded để dữ liệu có thể tải lại khi vào "Cấu hình"
+        }
+      });
+    });
+
+    // Hàm tải cấu hình khi vào tab "Cấu hình"
+    function loadConfigData() {
+      const configValue = [configValueFile1, configValueFile2, configValueFile3, configValueFile4, configValueFile5][parseInt(fileSelect.value)];
+      updateInputsFromConfig(configValue);  // Cập nhật dữ liệu vào ô input
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      // Lấy chỉ số và tên file từ localStorage
+      const lastSelectedFile = localStorage.getItem("lastSelectedFile");
+      const fileNames = JSON.parse(localStorage.getItem("fileNames") || "[]");
+
+      // Khôi phục tên file từ localStorage cho dropdown
+      const fileSelect = document.getElementById("fileSelect");
+
+      if (lastSelectedFile !== null) {
+        fileSelect.selectedIndex = lastSelectedFile; // Đặt lại chỉ số của dropdown
+      }
+
+      // Khôi phục tên file hiển thị trong "Điều khiển"
+      const selectedFileName = fileNames[lastSelectedFile] || fileSelect.options[lastSelectedFile].text.replace("📁 ", "");
+      document.getElementById("selectedFileName").innerText = selectedFileName;
+    });
+
+    const eraWidget = new EraWidget();
+    
+    eraWidget.init({
+      needActions: true,
+      needConfigs: true,
+      mobileHeight: 930,
+
+      onConfiguration: (config) => {
+        
+        configNameFile1 = config.realtime_configs[0];
+        configNameFile2 = config.realtime_configs[1];
+        configNameFile3 = config.realtime_configs[2];
+        configNameFile4 = config.realtime_configs[3];
+        configNameFile5 = config.realtime_configs[4];
+
+        configValueFile1 = config.realtime_configs[5];
+        configValueFile2 = config.realtime_configs[6];
+        configValueFile3 = config.realtime_configs[7];
+        configValueFile4 = config.realtime_configs[8];
+        configValueFile5 = config.realtime_configs[9];
+
+        configND = config.realtime_configs[10];
+        configSV = config.realtime_configs[11];
+
+        configReadPrg = config.realtime_configs[12];
+        statusL = config.realtime_configs[13];
+        timechay = config.realtime_configs[14];
+
+        actionFile1 = config.actions[0];
+        actionFile2 = config.actions[1];
+        actionFile3 = config.actions[2];
+        actionFile4 = config.actions[3];
+        actionFile5 = config.actions[4];
+
+        actionRename1 = config.actions[5];
+        actionRename2 = config.actions[6];
+        actionRename3 = config.actions[7];
+        actionRename4 = config.actions[8];
+        actionRename5 = config.actions[9];
+
+        actionLoadFile1 = config.actions[10];
+        actionLoadFile2 = config.actions[11];
+        actionLoadFile3 = config.actions[12];
+        actionLoadFile4 = config.actions[13];
+        actionLoadFile5 = config.actions[14];
+
+        selectFileRUN = config.actions[15];
+        runStop = config.actions[16];
+        btnTangGiam = config.actions[17];
+
+        fileSelect.dispatchEvent(new Event("change"));
+        // Tự động trigger load cấu hình
+        setTimeout(() => {
+          const loadActions = [
+            actionLoadFile1,
+            actionLoadFile2,
+            actionLoadFile3,
+            actionLoadFile4,
+            actionLoadFile5
+          ];
+
+          const loadAction = loadActions[lastIdx];
+          if (loadAction) {
+            eraWidget.triggerAction(loadAction.action, null, { value: "__load__" });
+            fileSelect.dispatchEvent(new Event("change"));
+          }
+        }, 1000);
+      },
+      onValues: (values) => {
+        currentValues = values;
+
+        
+
+
+        const valueTempPV = values[configND.id].value;
+        const valueTempSV = values[configSV.id].value;
+        const valueFilePRG = values[configReadPrg.id].value;
+        const stLoDien = values[statusL.id].value;
+        const sttimechay =  values[timechay.id].value;
+
+        // 1. Cập nhật nhiệt độ
+        tempPV.innerHTML = !isNaN(valueTempPV) ? Math.round(valueTempPV/10) + ' °C' : '...';
+        tempSV.innerHTML = !isNaN(valueTempSV) ? (valueTempSV/10) + ' °C' : '...';
+
+        // 2. Trạng thái + cảnh báo
+        const [status, alert1] = stLoDien.split(",");
+        const statusTextEl = document.getElementById("statusText");
+        const statusIndicator = document.getElementById("statusIndicator");
+
+        if (statusTextEl && statusIndicator) {
+          if (status === "1") {
+            statusTextEl.textContent = "ĐANG CHẠY";
+            statusTextEl.classList.remove("stopped");
+            statusTextEl.classList.add("running");
+            statusIndicator.classList.add("icon-indicator");
+            statusIndicator.textContent = "🔥";
+
+            // Vô hiệu hóa dropdown khi đang chạy
+            stepSelect.disabled = true;
+          } else {
+            statusTextEl.textContent = "ĐANG DỪNG";
+            statusTextEl.classList.remove("running");
+            statusTextEl.classList.add("stopped");
+            statusIndicator.classList.remove("icon-indicator");
+            statusIndicator.textContent = "🔴";
+
+            // Kích hoạt lại dropdown khi dừng
+            stepSelect.disabled = false;
+          }
+        }
+
+
+        const alertBox = document.getElementById("alertText");
+        let alertText = "Không có cảnh báo";
+
+        if (alert1 === "1") {
+          alertText = "Mất kết nối đồng hồ";
+          alertBox.classList.add("blink");  // Áp dụng hiệu ứng chớp nháy
+        } else if (alert1 === "2") {
+          alertText = "Lỗi đồng hồ";
+          alertBox.classList.add("blink");  // Áp dụng hiệu ứng chớp nháy
+        } else {
+          alertBox.classList.remove("blink");  // Xóa hiệu ứng chớp nháy nếu không có cảnh báo
+        }
+
+        if (alertBox) {
+          alertBox.innerHTML = `<strong>${alertText}</strong>`;
+        }
+
+
+        // 3. Cập nhật dropdown #stepSelect (tab điều khiển)
+        const configNameFiles = [
+          configNameFile1, configNameFile2, configNameFile3,
+          configNameFile4, configNameFile5
+        ];
+        
+        if (sttimechay) {
+          const parts = sttimechay.split(",");
+          if (parts.length === 5) {
+            const [stbuochay, timeMin, stepElapsed, totalExpect, totalElapsed] = parts;
+            document.getElementById("stepNumber").innerText = stbuochay || "...";
+            document.getElementById("stepTime").innerText = timeMin ? `${timeMin} phút` : "...";
+            document.getElementById("stepElapsed").innerText = stepElapsed ? `${stepElapsed} phút` : "...";
+            // document.getElementById("totalExpected").innerText = totalExpect || "...";
+            // document.getElementById("totalElapsed").innerText = totalElapsed || "...";
+
+            // Định dạng lại thời gian tổng dự kiến từ "00:00" thành "giờ:phút"
+            const formattedTotalExpect = formatTime(totalExpect);
+            document.getElementById("totalExpected").innerText = formattedTotalExpect || "...";
+
+            // Định dạng lại thời gian tổng đã chạy từ "00:00" thành "giờ:phút"
+            const formattedTotalElapsed = formatTime(totalElapsed);
+            document.getElementById("totalElapsed").innerText = formattedTotalElapsed || "...";
+
+
+            // In ra console các giá trị
+          // console.log("Thời gian bước: " + (timeMin ? `${timeMin} phút` : "..."));
+          // console.log("Thời gian đã chạy: " + (stepElapsed ? `${stepElapsed} phút` : "..."));
+          // console.log("Thời gian tổng dự kiến: " + (formattedTotalExpect || "..."));
+          // console.log("Thời gian tổng đã chạy: " + (formattedTotalElapsed || "..."));
+          }
+        }
+
+      // Hàm định dạng thời gian từ "0:0" thành "00:00" và thêm chữ "giờ phút"
+      function formatTime(time) {
+        if (!time) return "00 giờ : 00 phút";  // Nếu không có giá trị, trả về mặc định
+
+        const timeParts = time.split(":");  // Tách giờ và phút
+        if (timeParts.length === 2) {
+          let hours = parseInt(timeParts[0], 10);  // Giờ
+          let minutes = parseInt(timeParts[1], 10);  // Phút
+
+          // Đảm bảo giờ và phút luôn có 2 chữ số
+          hours = padZero(hours);
+          minutes = padZero(minutes);
+
+          return `${hours} giờ : ${minutes} phút`;  // Định dạng với "giờ : phút"
+        }
+
+        return "00 giờ : 00 phút";  // Nếu không phải định dạng hợp lệ, trả về "00 giờ : 00 phút"
+      }
+
+        // Hàm thêm số 0 nếu số nhỏ hơn 10
+          function padZero(num) {
+            return num < 10 ? `0${num}` : num;
+          }
+
+          ////////////////
+          // ✅ Bây giờ mới dùng được vì biến đã tồn tại
+
+          ///////////////
+
+
+
+        updateStepSelectDropdown(configNameFiles, values, valueFilePRG);
+
+        // 4. Cập nhật dropdown #fileSelect (tab cấu hình)
+        const fileSelect = document.getElementById("fileSelect");
+        
+        // Danh sách label mới
+        const fileLabels = configNameFiles.map((cfg, i) => {
+          if (!cfg || !values[cfg.id]) return `📁 File ${i + 1}`;
+          let val = values[cfg.id].value;
+          try {
+            val = typeof val === 'string' ? JSON.parse(val) : val;
+          } catch {}
+          const label = val?.confirmed || val?.name || `File ${i + 1}`;
+          return `📁 ${label}`;
+        });
+
+        // Cập nhật dropdown nếu thực sự thay đổi
+        updateDropdownIfChanged(fileSelect, fileLabels);
+
+        // Khôi phục file được chọn trước đó (chỉ số)
+        const lastIdx = parseInt(localStorage.getItem("lastSelectedFile") || "0");
+        if (lastIdx >= 0 && lastIdx < fileSelect.options.length) {
+          fileSelect.value = lastIdx.toString();
+        }
+
+        // 5. Cập nhật ô nhập liệu từ file đã chọn ở tab cấu hình
+        const configValues = [
+          configValueFile1, configValueFile2, configValueFile3,
+          configValueFile4, configValueFile5
+        ];
+        const selectedIdx = parseInt(fileSelect.value);
+        const configValue = configValues[selectedIdx];
+      }
+    });
+    let isUpdatingFromConfig = false;
+
+    function updateInputsFromConfig(configValue) {
+      if (isEditing) return;  // ⛔ Đang chỉnh tay, không cập nhật
+
+      if (!configValue || !currentValues[configValue.id]) return;
+      const raw = currentValues[configValue.id].value;
+      try {
+        const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (parsed && typeof parsed === 'object') {
+          fields.forEach(id => {
+            if (parsed[id] !== undefined) {
+              document.getElementById(id).value = parsed[id];
+            }
+          });
+        }
+      } catch (e) {
+        console.error("❌ Không thể parse dữ liệu cấu hình:", e);
+      }
+    }
+
+
+
+    // Lắng nghe sự kiện khi người dùng chọn chương trình từ dropdown trong tab "Điều khiển"
+    document.getElementById("stepSelect").addEventListener("change", () => {
+      const idx = parseInt(document.getElementById("stepSelect").value);  // Lấy giá trị index của chương trình đã chọn
+
+      // Cập nhật tên chương trình hiển thị bên khu "Điều khiển"
+      const selectedOption = document.getElementById("stepSelect").options[idx];
+      document.getElementById("selectedFileName").innerText = selectedOption.text.replace("📁 ", "");
+
+      // Gửi giá trị action tương ứng với chỉ số file (1 cho File 1, 2 cho File 2,...)
+      const actionValue = idx;  // actionValue là 1 cho File 1, 2 cho File 2, v.v.
+
+      // Gửi action tới ESP32 (selectFileRUN là action bạn đã xác định)
+      if (selectFileRUN) {
+        eraWidget.triggerAction(selectFileRUN.action, null, { value: actionValue });
+      }
+
+      // Cập nhật ô nhập liệu từ cấu hình của file đã chọn
+      const configValue = [configValueFile1, configValueFile2, configValueFile3, configValueFile4, configValueFile5][idx];
+      updateInputsFromConfig(configValue);
+    });
+
+
+    renameBtn.addEventListener("click", () => {
+      const name = fileNameInput.value.trim();
+      const idx = parseInt(fileSelect.value);
+      if (!name) return;
+
+      // Cập nhật tên hiển thị trong dropdown
+      fileSelect.options[idx].text = `📁 ${name}`;
+      document.getElementById("selectedFileName").innerText = name;
+
+      // Reset input
+      fileNameInput.value = "";
+
+      // Gửi action đổi tên lên ESP
+      const renameActions = [actionRename1, actionRename2, actionRename3, actionRename4, actionRename5];
+      const renameAction = renameActions[idx];
+      if (renameAction) {
+        const payload = { value: { index: idx, name } };
+        eraWidget.triggerAction(renameAction.action, null, payload);
+        sentMsg.innerText = `📤 Đã gửi yêu cầu đổi tên File ${idx + 1} → "${name}"`;
+        setTimeout(() => sentMsg.innerText = "", 3000);
+      }
+    });
+
+
+    saveBtn.addEventListener("click", () => {
+      confirmBox.style.display = "block";
+    });
+
+    confirmNo.addEventListener("click", () => {
+      confirmBox.style.display = "none";
+    });
+
+    confirmYes.addEventListener("click", () => {
+      confirmBox.style.display = "none";
+      sendConfig();
+    });
+
+    loadBtn.addEventListener("click", () => {
+      const idx = parseInt(fileSelect.value);
+      const loadAction = [actionLoadFile1, actionLoadFile2, actionLoadFile3, actionLoadFile4, actionLoadFile5][idx];
+      if (!loadAction) return;
+
+      eraWidget.triggerAction(loadAction.action, null, { value: "__load__" });
+      sentMsg.innerText = `📥 Đã yêu cầu ESP32 gửi lại cấu hình File ${idx + 1}`;
+      setTimeout(() => sentMsg.innerText = "", 2000);
+      const configValue = [configValueFile1, configValueFile2, configValueFile3, configValueFile4, configValueFile5][parseInt(fileSelect.value)];
+      updateInputsFromConfig(configValue);
+    });
+
+    const allInputs = document.querySelectorAll('input[type="number"]');
+
+    allInputs.forEach(input => {
+      input.addEventListener("input", () => {
+        let val = input.value;
+        if (val === "") return;
+
+        // Ép về số nguyên không âm
+        let intVal = parseInt(val);
+        if (isNaN(intVal) || intVal < 0) intVal = 0;
+        if (intVal > 1300) intVal = 1300;
+
+        input.value = intVal;  // Cập nhật lại input
+      });
+
+      // Nếu để trống và chuyển focus thì trả về 0
+      input.addEventListener("blur", () => {
+        if (input.value.trim() === "") {
+          input.value = "0";
+        }
+      });
+    });
+
+// Gán sự kiện chỉ 1 lần khi load web
+inputs.forEach(input => {
+  input.addEventListener("input", () => {
+    isEditing = true;
+    if (editTimer) clearTimeout(editTimer);
+    editTimer = setTimeout(() => {
+      isEditing = false;  // Sau 3 giây không nhập nữa mới cho cập nhật lại
+    }, 3000);
+  });
+});
+
+
+
+    function sendConfig() {
+      const data = {};
+      let valid = true;
+
+      inputs.forEach(input => {
+        const val = input.value.trim();
+        if (/^-?\d+$/.test(val)) {
+          data[input.id] = parseInt(val);
+          input.classList.remove("error");
+        } else {
+          input.classList.add("error");
+          valid = false;
+        }
+      });
+
+      if (!valid) return;
+
+      const idx = parseInt(fileSelect.value);
+      const selectedAction = [actionFile1, actionFile2, actionFile3, actionFile4, actionFile5][idx];
+      if (!selectedAction) return;
+
+      eraWidget.triggerAction(selectedAction.action, null, { value: data });
+      sentMsg.innerText = `✅ Đã gửi cấu hình tới File ${idx + 1}`;
+      // ✅ Sau khi lưu → tự load lại từ ESP
+      setTimeout(() => {
+
+      // Kiểm tra xem idx có hợp lệ không
+        if (idx < 0 || idx >= 5) {
+            console.error("Index không hợp lệ: ", idx);
+            return;
+        }
+        const configValue = [configValueFile1, configValueFile2, configValueFile3, configValueFile4, configValueFile5][idx];
+        updateInputsFromConfig(configValue);
+      }, 2000);
+    }
+
+    // Lắng nghe sự kiện khi người dùng chọn chương trình từ dropdown trong tab "Điều khiển"
+  document.getElementById("stepSelect").addEventListener("change", () => {
+  const idx = parseInt(document.getElementById("stepSelect").value);  // Lấy giá trị index của chương trình đã chọn
+
+  // Cập nhật tên chương trình hiển thị bên khu "Điều khiển"
+  const selectedOption = document.getElementById("stepSelect").options[idx];
+  document.getElementById("selectedFileName").innerText = selectedOption.text.replace("📁 ", "");
+
+  // Không thay đổi giá trị của dropdown "Chọn file cấu hình" trong tab "Cấu hình"
+  // Vẫn giữ nguyên giá trị đã chọn trong dropdown của "Cấu hình"
+  });
+
+    // Lắng nghe sự kiện khi người dùng thay đổi file trong dropdown "Chọn file cấu hình"
+    fileSelect.addEventListener("change", () => {
+      const idx = parseInt(fileSelect.value);  // Lấy chỉ số của file đã chọn
+
+      // Cập nhật tên file hiển thị bên khu "Điều khiển"
+      const selectedOption = fileSelect.options[idx];
+      document.getElementById("selectedFileName").innerText = selectedOption.text.replace("📁 ", "");
+
+      // Lưu chỉ số và tên file vào localStorage
+      localStorage.setItem("lastSelectedFile", idx);  // Lưu chỉ số của file đã chọn vào localStorage
+      localStorage.setItem("lastSelectedFileName", selectedOption.text.replace("📁 ", ""));  // Lưu tên file vào localStorage
+
+      // Cập nhật ô nhập liệu từ cấu hình của file đã chọn
+      const configValue = [configValueFile1, configValueFile2, configValueFile3, configValueFile4, configValueFile5][idx];
+      updateInputsFromConfig(configValue);
+    });
+
+
+    function updateStepSelectDropdown(configNameFiles, values, currentIndex) {
+      const stepSelect = document.getElementById("stepSelect");
+
+      const newOptions = configNameFiles.map((cfg, i) => {
+        if (!cfg || !values[cfg.id]) return `📁 File ${i + 1}`;
+        let val = values[cfg.id].value;
+        try {
+          val = typeof val === 'string' ? JSON.parse(val) : val;
+        } catch {}
+        return `📁 ${val?.confirmed || val?.name || `File ${i + 1}`}`;
+      });
+
+      const currentOptions = Array.from(stepSelect.options).map(opt => opt.text.trim());
+      const same = newOptions.length === currentOptions.length &&
+                  newOptions.every((txt, i) => txt === currentOptions[i]);
+
+      // Nếu khác thì cập nhật lại dropdown
+      if (!same) {
+        const currentValue = stepSelect.value;
+        stepSelect.innerHTML = "";
+        newOptions.forEach((text, i) => {
+          const opt = document.createElement("option");
+          opt.value = i.toString();
+          opt.text = text;
+          stepSelect.appendChild(opt);
+        });
+
+        // Khôi phục lựa chọn nếu còn tồn tại
+        if ([...stepSelect.options].some(opt => opt.value === currentValue)) {
+          stepSelect.value = currentValue;
+        }
+      }
+
+      // ✅ Luôn đồng bộ trạng thái theo chỉ số ESP gửi (ngay cả khi dropdown không đổi)
+      if (currentIndex >= 0 && currentIndex < stepSelect.options.length) {
+        stepSelect.value = currentIndex.toString();
+        document.getElementById("selectedFileName").innerText =
+          stepSelect.options[currentIndex].text.replace(/📁\s*/, "");
+      }
+    }
+
+
+    function updateDropdownIfChanged(selectEl, newOptions) {
+      const currentOptions = Array.from(selectEl.options).map(opt => opt.text.trim().replace("📁 ", ""));
+      const cleanedNewOptions = newOptions.map(opt => opt.trim().replace("📁 ", ""));
+
+      const same = cleanedNewOptions.length === currentOptions.length &&
+                  cleanedNewOptions.every((txt, i) => txt === currentOptions[i]);
+
+      if (same) return; // Không cần cập nhật
+
+      const currentValue = selectEl.value; // ✅ Ghi nhớ giá trị đang chọn
+
+      selectEl.innerHTML = ""; // Xóa hết option cũ
+      newOptions.forEach((text, i) => {
+        const opt = document.createElement("option");
+        opt.value = i.toString();
+        opt.text = text;
+        selectEl.appendChild(opt);
+      });
+
+      // ✅ Khôi phục lại lựa chọn đang chọn (nếu còn tồn tại)
+      if ([...selectEl.options].some(opt => opt.value === currentValue)) {
+        selectEl.value = currentValue;
+      }
+    }
+    //sự kiện nhấn nút tăng giảm
+
+    document.getElementById("step-up").addEventListener("click", () => {
+      if (btnTangGiam) {
+        eraWidget.triggerAction(btnTangGiam.action, null, { value: 1 });  // Gửi lệnh tăng lên ESP32 qua V25
+        console.log("🔼 Đã gửi yêu cầu tăng bước nhiệt");
+      }
+    });
+
+    document.getElementById("step-down").addEventListener("click", () => {
+      if (btnTangGiam) {
+        eraWidget.triggerAction(btnTangGiam.action, null, { value: -1 });  // Gửi lệnh giảm xuống ESP32 qua V25
+        console.log("🔽 Đã gửi yêu cầu giảm bước nhiệt");
+      }
+    });
+
+// Đặt biến để lưu nút nhấn cần thực hiện
+let actionToConfirm = null;
+
+// Hàm hiển thị popup xác nhận
+function showConfirmationPopup(action) {
+  actionToConfirm = action;  // Lưu hành động cần xác nhận
+  document.getElementById('confirmationPopup').style.display = 'block';  // Hiển thị popup
+}
+
+// Đóng popup xác nhận
+function closeConfirmationPopup() {
+  document.getElementById('confirmationPopup').style.display = 'none';  // Ẩn popup
+}
+
+// Xử lý khi nhấn nút Xác nhận
+document.getElementById('confirmActionButton').addEventListener('click', () => {
+  if (actionToConfirm) {
+    actionToConfirm();  // Thực hiện hành động đã lưu
+    closeConfirmationPopup();  // Đóng popup
+  }
+});
+
+// Xử lý khi nhấn nút Hủy
+document.getElementById('cancelActionButton').addEventListener('click', () => {
+  closeConfirmationPopup();  // Đóng popup mà không thực hiện hành động
+});
+
+// Sự kiện cho các nút
+document.getElementById('startButton').addEventListener('click', () => {
+  showConfirmationPopup(() => {
+    if (runStop) {
+      console.log("Gửi lệnh CHẠY với action:");
+      eraWidget.triggerAction(runStop.action, null, { value: 1 });
+    }
+  });
+});
+
+document.getElementById('stopButton').addEventListener('click', () => {
+  showConfirmationPopup(() => {
+    if (runStop) {
+      console.log("Gửi lệnh DỪNG với action:");
+      eraWidget.triggerAction(runStop.action, null, { value: 0 });
+    }
+  });
+});
+  </script>
+</body>
+</html>
